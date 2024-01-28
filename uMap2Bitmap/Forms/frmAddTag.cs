@@ -50,14 +50,19 @@ namespace uMap2Bitmap.Forms
 
         private (bool, string) IsValidTag()
         {
-            if (txtTagName.Text.Trim().INOE()) { return (false, "The tag name is empty."); }
+            string tagName = txtTagName.Text.Trim();
+            if (tagName.INOE()) { return (false, "The tag name is empty."); }
             foreach (DataGridViewRow row in _dgvGlobalTags.Rows)
             {
-                if (row.Cells["TagName"].Value.ToStringSafely().Equals(txtTagName.Text.Trim(), StringComparison.OrdinalIgnoreCase))
+                if (row.Cells["TagName"].Value.ToStringSafely().Equals(tagName, StringComparison.OrdinalIgnoreCase))
                 { return (false, "This tag name is already used."); }
             }
 
-            // globals - polysprops
+            if (Globals.CustomPropsStats.ContainsKey(tagName))
+            {
+                return (false, "There are some polygons that have properties with this name. Therefore, this tag name can't be used." + Environment.NewLine + 
+                    "Press the 'Check in polygons' label to see where it's used.");
+            }
 
             string tagValue = txtTagValue.Text.Trim();
             if (tagValue.INOE()) { return (false, "The tag value is empty."); }
@@ -98,6 +103,34 @@ namespace uMap2Bitmap.Forms
             {
                 MessageBox.Show(this, "Please don't forget to replace the X and Y letters with integers!",
                     "Custom integers info", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void lblCheckTagName_Click(object sender, EventArgs e)
+        {
+            string tagName = txtTagName.Text.Trim();
+            if (Globals.CustomPropsStats.ContainsKey(tagName))
+            {
+                int polysCount = 0;
+                int layersCount = Globals.CustomPropsStats[tagName].Values.Where(w => w.Count > 0).Count();
+                Globals.CustomPropsStats[tagName].Values.Select(s => s).ToList().ForEach(f => polysCount += f.Count);
+
+                string polys = polysCount == 1 ? "one polygon" : $"{polysCount} polygons";
+                string layers = layersCount == 1 ? "one layer" : $"{layersCount} layers";
+
+                DialogResult result = MessageBox.Show(this, $"This name IS used in {polys}, from {layers}." +
+                    Environment.NewLine + "Do you want to see exactly where?",
+                    "Global tag name check", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                if (result == DialogResult.Yes)
+                {
+                    // TO DO: compute the result & open it in notepad
+
+                }
+            }
+            else
+            {
+                MessageBox.Show(this, "This name is NOT used in any polygon's properties. You're free to use it.",
+                    "Global tag name check", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
     }

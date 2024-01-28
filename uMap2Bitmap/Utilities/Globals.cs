@@ -20,7 +20,7 @@ namespace uMap2Bitmap.Utilities
 
         public static List<string> PolysProps = new List<string>();
 
-
+        public static Dictionary<string, Dictionary<string, List<string>>> CustomPropsStats;
 
     }
 }

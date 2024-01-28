@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualBasic.ApplicationServices;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -15,6 +16,7 @@ using System.Windows.Forms;
 using uMap2Bitmap.Controls;
 using uMap2Bitmap.Entities;
 using uMap2Bitmap.Utilities;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace uMap2Bitmap.Forms
@@ -328,48 +330,32 @@ namespace uMap2Bitmap.Forms
 
         private void LoadPolysProperties()
         {
-            Dictionary<string, Dictionary<string, List<string>>> dic = new Dictionary<string, Dictionary<string, List<string>>>(StringComparer.OrdinalIgnoreCase);
-            //         poly prop name     layer name   polys names
+            Globals.CustomPropsStats = new Dictionary<string, Dictionary<string, List<string>>>(StringComparer.OrdinalIgnoreCase);
+            //Dictionary<string, Dictionary<string, List<string>>>
+            ////         custom             layer        features
+            ////         prop               name         names
+            ////         name
 
-
-
-            var allProps = _uMapData.Layers.SelectMany(x => x.Features)
-                .SelectMany(s => s.Properties.Properties().Select(s => s.Name))
+            List<string> allProps = _uMapData.Layers.SelectMany(layer => layer.Features)
+                .SelectMany(feature => feature.Properties.Properties().Select(jProperty => jProperty.Name))
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
-
-
-            var vvv = _uMapData.Layers.SelectMany(x => x.Features.Where(w => w.Properties.ContainsKey("description")));
-
-
-
-            if (_uMapData is null) { return; }
-            foreach (Layer layer in _uMapData.Layers)
+            foreach (string prop in allProps)
             {
-                if (layer.Features.Count == 0) { continue; }
-                foreach (Feature polygon in layer.Features)
+                Globals.CustomPropsStats.Add(prop, new Dictionary<string, List<string>>());
+                foreach (Layer layer in _uMapData.Layers)
                 {
-                    if (polygon.Properties.Count == 0) { continue; }
-                    foreach (string? propertyName in polygon.Properties.Properties().OrderBy(jProp => jProp.Name).Select(jProp => jProp.Name))
-                    {
-                        if (propertyName is null) { continue; }
-                        if (dic.ContainsKey(propertyName))
-                        {
+                    List<string> featureNames = layer.Features.Where(feature => feature.Properties.Properties()
+                        .Any(jProperty => jProperty.Name.Equals(prop, StringComparison.OrdinalIgnoreCase)))
+                        .Select(feature => feature.Properties.Get("name"))
+                        .ToList();
 
-                        }
-                        else
-                        {
-                            var tst = new Dictionary<string, List<string>>()
-                            {
-                                { layer.UmapOptions.Name, new List<string>() }
-                            };
-                            dic.Add(propertyName, tst);
-                        }
-                    }
+                    Globals.CustomPropsStats[prop].Add(layer.UmapOptions.Name, featureNames);
                 }
             }
 
+            string rawDebugData = JsonConvert.SerializeObject(Globals.CustomPropsStats); // for debugging only, will be removed later
         }
 
         private void UpdateStatistics()

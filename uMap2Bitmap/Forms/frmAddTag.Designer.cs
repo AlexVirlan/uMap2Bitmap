@@ -38,6 +38,7 @@
             label2 = new Label();
             lblAddDynamicValue = new Label();
             panel1 = new Panel();
+            lblCheckTagName = new Label();
             panel2 = new Panel();
             toolTips = new ToolTip(components);
             cmsDynamicValues = new ContextMenuStrip(components);
@@ -149,6 +150,7 @@
             // 
             panel1.BorderStyle = BorderStyle.FixedSingle;
             panel1.Controls.Add(txtTagName);
+            panel1.Controls.Add(lblCheckTagName);
             panel1.Controls.Add(lblAddDynamicValue);
             panel1.Controls.Add(txtTagValue);
             panel1.Controls.Add(label2);
@@ -157,6 +159,19 @@
             panel1.Name = "panel1";
             panel1.Size = new Size(227, 130);
             panel1.TabIndex = 14;
+            // 
+            // lblCheckTagName
+            // 
+            lblCheckTagName.AutoSize = true;
+            lblCheckTagName.Cursor = Cursors.Hand;
+            lblCheckTagName.Font = new Font("Segoe UI", 9F, FontStyle.Underline);
+            lblCheckTagName.Location = new Point(107, 11);
+            lblCheckTagName.Name = "lblCheckTagName";
+            lblCheckTagName.Size = new Size(105, 15);
+            lblCheckTagName.TabIndex = 13;
+            lblCheckTagName.Text = "Check in polygons";
+            toolTips.SetToolTip(lblCheckTagName, "Check if there are polygons \r\nwith properties with this name.");
+            lblCheckTagName.Click += lblCheckTagName_Click;
             // 
             // panel2
             // 
@@ -314,5 +329,6 @@
         private ToolStripSeparator toolStripSeparator2;
         private ToolStripMenuItem moreInfoToolStripMenuItem;
         private ToolStripMenuItem customIntegersToolStripMenuItem;
+        private Label lblCheckTagName;
     }
 }
