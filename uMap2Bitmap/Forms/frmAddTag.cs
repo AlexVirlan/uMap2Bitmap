@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -124,12 +125,16 @@ namespace uMap2Bitmap.Forms
                 if (result == DialogResult.Yes)
                 {
                     // TO DO: compute the result & open it in notepad
+                    Dictionary<string, List<string>> tagUsageDetails = Globals.CustomPropsStats[tagName].Where(w => w.Value.Count > 0).ToDictionary();
+                    string response = JsonConvert.SerializeObject(tagUsageDetails, Formatting.Indented);
+                    Helpers.ShowNotepadMessage(response);
+                    // TO DO: submenu - show in human-readable form, or JSON
 
                 }
             }
             else
             {
-                MessageBox.Show(this, "This name is NOT used in any polygon's properties. You're free to use it.",
+                MessageBox.Show(this, $"This name is NOT used in any polygon's properties. {Environment.NewLine}You're free to use it.",
                     "Global tag name check", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
