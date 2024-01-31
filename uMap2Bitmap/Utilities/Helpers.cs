@@ -26,6 +26,9 @@ namespace uMap2Bitmap.Utilities
 
         [DllImport("User32.dll", EntryPoint = "SendMessage")]
         private static extern int SendMessage(IntPtr hWnd, int uMsg, int wParam, string lParam);
+
+        [DllImport("user32.dll", EntryPoint = "SetForegroundWindow")]
+        static extern bool SetForegroundWindow(IntPtr hWnd);
         #endregion
 
         public static int GetRandomInt(int min = 0, int max = 100)
@@ -155,6 +158,7 @@ namespace uMap2Bitmap.Utilities
                 {
                     IntPtr child = FindWindowEx(notepad.MainWindowHandle, new IntPtr(0), "Edit", null);
                     _ = SendMessage(child, 0x000C, 0, message);
+                    _ = SetForegroundWindow(notepad.MainWindowHandle);
                 }
             }
         }
