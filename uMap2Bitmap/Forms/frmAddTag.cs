@@ -126,14 +126,15 @@ namespace uMap2Bitmap.Forms
                     "Global tag name check", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                 if (drShowDetails == DialogResult.Yes)
                 {
+                    string result = @$"The property ""{tagName}"" is used in {polys}, from {layers} as follows:" + _NL.Repeat();
                     Dictionary<string, List<string>> tagUsageDetails = Globals.CustomPropsStats[tagName].Where(w => w.Value.Count > 0).ToDictionary();
                     if (ModifierKeys.HasFlag(Keys.Control))
                     {
-                        Helpers.ShowNotepadMessage(JsonConvert.SerializeObject(tagUsageDetails, Formatting.Indented), "Tag name usage");
+                        string jsonStr = JsonConvert.SerializeObject(tagUsageDetails, Formatting.Indented);
+                        Helpers.ShowNotepadMessage(result + jsonStr, "Tag name usage");
                     }
                     else
                     {
-                        string result = @$"The property ""{tagName}"" is used in:" + _NL.Repeat();
                         foreach (KeyValuePair<string, List<string>> kvpLP in tagUsageDetails)
                         {
                             result += $"• {kvpLP.Key}" + _NL + string.Join(_NL, kvpLP.Value) + _NL.Repeat();
