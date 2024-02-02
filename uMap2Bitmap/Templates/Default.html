@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>uMap2Bitmap - Default/demo template</title>
+    <link rel="stylesheet" href="css/leaflet.1.9.3.css" />
+    <link rel="stylesheet" href="css/bootstrap.5.3.0.a1.min.css" />
+    <script src="js/leaflet.1.9.3.min.js"></script>
+    <script src="js/leaflet.pip.js"></script>
+    <script src="js/leaflet.geometryutil.0.9.1.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <style>
+        body, html {
+            height: 100%
+        }
+
+        .text {
+            color: white;
+        }
+
+        .blackBG {
+            background-color: black;
+        }
+
+        .pointer {
+            cursor: pointer;
+        }
+
+        .mapContainer {
+            width: 100vw;
+            height: 100vh;
+            padding: 0;
+        }
+
+        .map {
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .overlay {
+            top: 0;
+            left: 0;
+            margin-top: 20px;
+            margin-left: 20px;
+            margin-right: 20px;
+            position: absolute;
+            z-index: 1000;
+            padding: 12px;
+            border-radius: 26px;
+            border-style: solid;
+            border-color: rgba(255, 255, 255, 1);
+            border-width: 3px;
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+    </style>
+</head>
+<body class="blackBG">
+    <div class="container-fluid">
+        <div class="row">
+            <div id="mapAndOverlayDiv" class="col-sm-12 mapContainer">
+                <div id="map" class="map"></div>
+            </div>
+            <div id="errorDiv" class="blackBG text text-center d-flex flex-column min-vh-100 justify-content-center d-none">
+                <h2>Oops, an error occurred. :(</h2>
+                <br>
+                <p id="errDetails">Error details</p>
+                <br>
+            </div>
+        </div>
+    </div>
+    <script>
+		try {
+			var territoryId;
+			var lfMap;
+			var mapStyle;
+			var geoJsonLayer;
+			var mapCenter;
+			var locationMarker;
+			var locationPolyLine;
+			var territory = {};
+
+			var southWestCorner = L.latLng(44.06827614880959, 28.39707341277972);
+			var northEastCorner = L.latLng(44.29577080839874, 28.859872485045344);
+			var limitBounds = L.latLngBounds(southWestCorner, northEastCorner);
+
+			lfMap = L.map('map', {
+				attributionControl: false,
+				zoomControl: false,
+				zoomDelta: 1,
+				zoomSnap: 1
+			}).setView([20, 0], 1.5);
+
+			L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+				maxZoom: 19,
+				tileSize: 256,
+				zoomOffset: 0,
+				attribution: 'AvA.Soft',
+				opacity: 1
+			}).addTo(lfMap);
+
+			mapStyle = {
+				stroke: true,
+				color: 'red',
+				weight: 3,
+				opacity: 1,
+				fill: true,
+				fillColor: 'red',
+				fillOpacity: 0.2
+			};
+
+			fetch('TeritoriiCTSud.umap').then(data => data.json()).then(data => LoadUmapData(data));
+
+			function CenterMap() {
+				lfMap.fitBounds(geoJsonLayer.getBounds());
+			}
+
+			function LoadUmapData(jsonData) {
+				jsonData.layers.forEach((layer) => {
+					layer.features.forEach((feature) => {
+						if (feature.properties.name.toUpperCase() == territoryId) {
+							territory.geometry = feature.geometry;
+							territory.description = feature.properties.description;
+							territory.housing = feature.properties.NrAproxLocuinte;
+							territory.type = layer._umap_options.name.replace("Teritorii ", "");
+							territory.typeDescription = layer._umap_options.description;
+						}
+					});
+				});
+
+				if (territory.geometry == null) {
+					throw new Error("");
+				}
+
+				geoJsonLayer = L.geoJSON(territory.geometry, { style: mapStyle }).addTo(lfMap);
+				CenterMap();
+				mapCenter = lfMap.getCenter();
+				lfMap.setMaxBounds(limitBounds);
+			}
+
+		} catch (error) {
+			document.getElementById("errDetails").innerHTML = `Detalii:<br><b>${error}</b>`;
+			document.getElementById("errorDiv").classList.remove("d-none");
+			document.getElementById("mapAndOverlayDiv").style.display = "none";
+		}
+    </script>
+</body>
+</html>
