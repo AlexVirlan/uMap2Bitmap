@@ -611,7 +611,7 @@ namespace uMap2Bitmap.Forms
 
         private void lblTagsInfo_Click(object sender, EventArgs e)
         {
-            ShowMessage($"Tags are properties of the map, layers, and polygons, that can be used as variables in your templates. {_NL.Repeat()}You can insert them anywhere in your templates, just make sure they are in the correct format (enclosed in double curly braces). {_NL.Repeat()}They will be automatically replaced with their corresponding value in the map window preview. {_NL.Repeat()}Besides the 15 built-in tags, you can use any of the custom properties of a polygon (visible in the properties panel when you select a polygon), that are manageable from the uMap platform*. {_NL.Repeat()}Don't worry if some of the polygons do not have certain properties. If a tag's value is missing/null/empty, nothing will be inserted in that tag's place. {_NL.Repeat()}*Note: Duplicated polygon properties will be ignored.");
+            ShowMessage($"Tags are properties of the map, layers, and polygons, that can be used as variables in your templates. {_NL.Repeat()}You can insert them anywhere in your templates, just make sure they are in the correct format (enclosed in double curly braces). {_NL.Repeat()}They will be automatically replaced with their corresponding value in the map window preview. {_NL.Repeat()}Besides the 16 built-in tags, you can use any of the custom properties of a polygon (visible in the properties panel when you select a polygon), that are manageable from the uMap platform*. {_NL.Repeat()}Don't worry if some of the polygons do not have certain properties. If a tag's value is missing/null/empty, an empty string will be inserted in that tag's place. {_NL.Repeat()}*Note: Duplicated polygon properties will be ignored. {_NL.Repeat()} To learn more about how to use the tags, select the 'Default' template.");
         }
 
         private void lblMapDefaultBackgroundColor_MouseClick(object sender, MouseEventArgs e)
@@ -737,6 +737,7 @@ namespace uMap2Bitmap.Forms
             #region Polygon properties
             if (_selectedPolygon is not null)
             {
+                map.Add("{{geometry}}", JsonConvert.SerializeObject(_selectedPolygon.Geometry));
                 foreach (JProperty property in _selectedPolygon.Properties.Properties().OrderBy(prop => prop.Name))
                 {
                     if (map.ContainsKey($"{{{{{property.Name}}}}}")) { continue; }
