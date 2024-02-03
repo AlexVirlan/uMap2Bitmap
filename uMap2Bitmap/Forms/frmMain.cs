@@ -730,14 +730,15 @@ namespace uMap2Bitmap.Forms
                 { "{{layerFill}}", layerFill },
                 { "{{layerFillColor}}", layerFillColor },
                 { "{{layerFillOpacity}}", layerFillOpacity },
-                { "{{polygonName}}", _selectedPolygon is null ? "" : _selectedPolygon.Properties.Get("name") }
+                { "{{polygonName}}", _selectedPolygon is null ? "" : _selectedPolygon.Properties.Get("name") },
+                { "{{geometry}}", string.Empty }
             };
             #endregion
 
             #region Polygon properties
             if (_selectedPolygon is not null)
             {
-                map.Add("{{geometry}}", JsonConvert.SerializeObject(_selectedPolygon.Geometry));
+                map["{{geometry}}"] = JsonConvert.SerializeObject(_selectedPolygon.Geometry);
                 foreach (JProperty property in _selectedPolygon.Properties.Properties().OrderBy(prop => prop.Name))
                 {
                     if (map.ContainsKey($"{{{{{property.Name}}}}}")) { continue; }
