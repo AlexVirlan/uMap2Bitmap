@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Web.WebView2.Core;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -43,7 +44,15 @@ namespace uMap2Bitmap.Forms
 
         private async Task InitializeAsync()
         {
-            await webView.EnsureCoreWebView2Async(null);
+            //CoreWebView2EnvironmentOptions opts = new CoreWebView2EnvironmentOptions()
+            //{ AdditionalBrowserArguments = "--disable-web-security --allow-file-access-from-files --allow-file-access" };
+
+            var options = new CoreWebView2EnvironmentOptions("--disable-web-security --allow-file-access-from-files --allow-file-access");
+            var environment = await CoreWebView2Environment.CreateAsync(null, null, options);
+            //await webView2.EnsureCoreWebView2Async(environment);
+
+            await webView.EnsureCoreWebView2Async(environment);
+            webView.CoreWebView2.SetVirtualHostNameToFolderMapping("Templates", Application.StartupPath, CoreWebView2HostResourceAccessKind.Allow);
         }
 
         private async void frmBrowser_Load(object sender, EventArgs e)

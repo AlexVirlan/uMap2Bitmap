@@ -121,7 +121,8 @@
                 lfMap.fitBounds(geoJsonLayer.getBounds());
             }
 
-		} catch (error) {
+        } catch (error) {
+            console.log(error);
 			document.getElementById("errDetails").innerHTML = `Details:<br><b>${error}</b>`;
 			document.getElementById("errorDiv").classList.remove("d-none");
 			document.getElementById("mapAndOverlayDiv").style.display = "none";

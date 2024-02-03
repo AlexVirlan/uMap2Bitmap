@@ -49,7 +49,7 @@ namespace uMap2Bitmap.Forms
             LoadTextEditors();
             LoadTemplates();
             fswTemplates.Path = "Templates";
-
+            var vvv = Application.StartupPath;
         }
 
         private void frmMain_Shown(object sender, EventArgs e)
