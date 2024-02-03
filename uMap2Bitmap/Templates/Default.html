@@ -73,14 +73,11 @@
     </div>
     <script>
 		try {
-			var territoryId;
 			var lfMap;
 			var mapStyle;
 			var geoJsonLayer;
-			var mapCenter;
-			var locationMarker;
-			var locationPolyLine;
-			var territory = {};
+            var mapCenter;
+            var geometry;
 
 			var southWestCorner = L.latLng(44.06827614880959, 28.39707341277972);
 			var northEastCorner = L.latLng(44.29577080839874, 28.859872485045344);
@@ -111,37 +108,21 @@
 				fillOpacity: 0.2
 			};
 
-			fetch('TeritoriiCTSud.umap').then(data => data.json()).then(data => LoadUmapData(data));
+            LoadUmapData();
 
-			function CenterMap() {
-				lfMap.fitBounds(geoJsonLayer.getBounds());
-			}
-
-			function LoadUmapData(jsonData) {
-				jsonData.layers.forEach((layer) => {
-					layer.features.forEach((feature) => {
-						if (feature.properties.name.toUpperCase() == territoryId) {
-							territory.geometry = feature.geometry;
-							territory.description = feature.properties.description;
-							territory.housing = feature.properties.NrAproxLocuinte;
-							territory.type = layer._umap_options.name.replace("Teritorii ", "");
-							territory.typeDescription = layer._umap_options.description;
-						}
-					});
-				});
-
-				if (territory.geometry == null) {
-					throw new Error("");
-				}
-
-				geoJsonLayer = L.geoJSON(territory.geometry, { style: mapStyle }).addTo(lfMap);
+			function LoadUmapData() {
+				geoJsonLayer = L.geoJSON(geometry, { style: mapStyle }).addTo(lfMap);
 				CenterMap();
 				mapCenter = lfMap.getCenter();
 				lfMap.setMaxBounds(limitBounds);
 			}
 
+            function CenterMap() {
+                lfMap.fitBounds(geoJsonLayer.getBounds());
+            }
+
 		} catch (error) {
-			document.getElementById("errDetails").innerHTML = `Detalii:<br><b>${error}</b>`;
+			document.getElementById("errDetails").innerHTML = `Details:<br><b>${error}</b>`;
 			document.getElementById("errorDiv").classList.remove("d-none");
 			document.getElementById("mapAndOverlayDiv").style.display = "none";
 		}
