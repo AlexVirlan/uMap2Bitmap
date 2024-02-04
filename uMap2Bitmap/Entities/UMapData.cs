@@ -62,10 +62,13 @@
     public partial class FeatureGeometry
     {
         [JsonProperty("type")]
+        [JsonConverter(typeof(StringEnumConverter))]
         public GeometryType Type { get; set; }
 
         [JsonProperty("coordinates")]
-        public List<List<List<Coordinate>>> Coordinates { get; set; }
+        public JArray Coordinates { get; set; }
+        //public List<List<List<Coordinate>>> Coordinates { get; set; }
+        //public List<List<List<double>>> Coordinates { get; set; }
     }
 
     [Obsolete("Replaced by a JObject")]
