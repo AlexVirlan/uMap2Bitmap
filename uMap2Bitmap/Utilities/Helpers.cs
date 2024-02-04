@@ -2,7 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing.Imaging;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -30,6 +32,16 @@ namespace uMap2Bitmap.Utilities
         [DllImport("user32.dll", EntryPoint = "SetForegroundWindow")]
         static extern bool SetForegroundWindow(IntPtr hWnd);
         #endregion
+
+        public static ImageFormat ParseImageFormat(string str)
+        {
+            PropertyInfo? propertyInfo = typeof(ImageFormat).GetProperty(str, BindingFlags.Public | BindingFlags.Static | BindingFlags.IgnoreCase);
+            if (propertyInfo is null) { return ImageFormat.Png; }
+            object? piValue = propertyInfo.GetValue(str, null);
+            if (piValue is null) { return ImageFormat.Png; }
+            return (ImageFormat)piValue;
+            //return (ImageFormat)typeof(ImageFormat).GetProperty(str, BindingFlags.Public | BindingFlags.Static | BindingFlags.IgnoreCase).GetValue(str, null);
+        }
 
         public static int GetRandomInt(int min = 0, int max = 100)
         {

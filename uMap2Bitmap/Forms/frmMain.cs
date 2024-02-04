@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualBasic.ApplicationServices;
+using Microsoft.Web.WebView2.Core;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -7,8 +8,10 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -542,9 +545,31 @@ namespace uMap2Bitmap.Forms
             }
         }
 
-        private void btnRUN_Click(object sender, EventArgs e)
+        private async void btnRUN_Click(object sender, EventArgs e)
         {
+            await SaveBitmap(); // just for testing
+        }
 
+        private async Task SaveBitmap()
+        {
+            PageCapture pageCaptureSettings = new PageCapture() // in the future take this from settings
+            {
+                Format = PageCaptureType.Png,
+                Quality = 100,
+                FromSurface = true,
+                CaptureBeyondViewport = true,
+                OptimizeForSpeed = false
+            };
+            string pageCaptureStr = JsonConvert.SerializeObject(pageCaptureSettings, Formatting.None);
+
+            string devData = await _frmBrowser.webView.CoreWebView2.CallDevToolsProtocolMethodAsync("Page.captureScreenshot", pageCaptureStr);
+            string imgData = JObject.Parse(devData)["data"].ToString();
+            using (MemoryStream memoryStream = new MemoryStream(Convert.FromBase64String(imgData)))
+            {
+                string format = pageCaptureSettings.Format.ToString().ToLower();
+                Image image = Image.FromStream(memoryStream);
+                image.Save($"Capture.{format}", Helpers.ParseImageFormat(format));
+            }
         }
 
         private void cmbTemplates_SelectedIndexChanged(object sender, EventArgs e)

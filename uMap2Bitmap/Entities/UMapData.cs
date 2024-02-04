@@ -1,12 +1,12 @@
-﻿namespace uMap2Bitmap.Entities
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Converters;
-    using Newtonsoft.Json.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Linq;
 
+namespace uMap2Bitmap.Entities
+{
     public partial class UMapData
     {
         [JsonProperty("type")]

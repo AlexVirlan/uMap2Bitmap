@@ -1,4 +1,6 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +9,91 @@ using System.Threading.Tasks;
 
 namespace uMap2Bitmap.Entities
 {
+    /// <summary>
+    /// For more info see <see href="https://chromedevtools.github.io/devtools-protocol/tot/Page/#method-captureScreenshot">this article.</see>
+    /// </summary>
+    public class PageCapture
+    {
+        #region Properties
+        /// <summary>
+        /// Image compression format (defaults to png). Allowed Values: jpeg, png, webp.
+        /// </summary>
+        [JsonProperty("format")]
+        [JsonConverter(typeof(StringEnumConverter), converterParameters: typeof(CamelCaseNamingStrategy))]
+        public PageCaptureType Format { get; set; }
+
+        /// <summary>
+        /// Compression quality from range [0..100] (jpeg only).
+        /// </summary>
+        [JsonProperty("quality")]
+        public int Quality { get; set; }
+
+        /// <summary>
+        /// Capture the screenshot of a given region only.
+        /// </summary>
+        [JsonIgnore]
+        [JsonProperty("clip")]
+        public PageClip Clip { get; set; }
+
+        /// <summary>
+        /// Capture the screenshot from the surface, rather than the view. Defaults to true. EXPERIMENTAL
+        /// </summary>
+        [JsonProperty("fromSurface")]
+        public bool FromSurface { get; set; }
+
+        /// <summary>
+        /// Capture the screenshot beyond the viewport. Defaults to false. EXPERIMENTAL
+        /// </summary>
+        [JsonProperty("captureBeyondViewport")]
+        public bool CaptureBeyondViewport { get; set; }
+
+        /// <summary>
+        /// Optimize image encoding for speed, not for resulting size (defaults to false). EXPERIMENTAL
+        /// </summary>
+        [JsonProperty("optimizeForSpeed")]
+        public bool OptimizeForSpeed { get; set; }
+        #endregion
+
+        #region Constructors
+
+        #endregion
+    }
+
+    public class PageClip
+    {
+        #region Properties
+        /// <summary>
+        /// X offset in device independent pixels (dip).
+        /// </summary>
+        [JsonProperty("x")]
+        public int X { get; set; }
+
+        /// <summary>
+        /// Y offset in device independent pixels (dip).
+        /// </summary>
+        [JsonProperty("y")]
+        public int Y { get; set; }
+
+        /// <summary>
+        /// Rectangle width in device independent pixels (dip).
+        /// </summary>
+        [JsonProperty("width")]
+        public int Width { get; set; }
+
+        /// <summary>
+        /// Rectangle height in device independent pixels (dip).
+        /// </summary>
+        [JsonProperty("height")]
+        public int Height { get; set; }
+
+        /// <summary>
+        /// Page scale factor.
+        /// </summary>
+        [JsonProperty("scale")]
+        public int Scale { get; set; }
+        #endregion
+    }
+
     public class Tag
     {
         #region Properties

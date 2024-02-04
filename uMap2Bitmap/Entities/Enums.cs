@@ -6,7 +6,12 @@ using System.Threading.Tasks;
 
 namespace uMap2Bitmap.Entities
 {
-
+    public enum PageCaptureType
+    {
+        Jpeg = 0,
+        Png = 1,
+        Webp = 2
+    }
 
     public enum PathType
     {
