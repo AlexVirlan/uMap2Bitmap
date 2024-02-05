@@ -31,6 +31,8 @@ namespace uMap2Bitmap.Forms
         private int _polysCount = 0;
         private string _appTitle = "uMap2Bitmap";
         private string _NL = Environment.NewLine;
+        private string _outputPath = string.Empty;
+        private string _currentFilePath = string.Empty;
         private bool _modifiedByCode = false;
         private UMapData? _uMapData = null;
         private UmapOptions? _selectedLayerOptions = null;
@@ -311,6 +313,9 @@ namespace uMap2Bitmap.Forms
                 treeView.Nodes.CheckTreeNodeCollection();
                 UpdateStatistics();
 
+                _currentFilePath = filePath;
+                SetDefaultOutputDirectory();
+
                 Thread threadPP = new Thread(LoadPolysProperties);
                 threadPP.Start();
 
@@ -545,13 +550,39 @@ namespace uMap2Bitmap.Forms
             }
         }
 
+        private void SetDefaultOutputDirectory()
+        {
+            _outputPath = Path.GetDirectoryName(_currentFilePath);
+            lblOutput.Text = new DirectoryInfo(_outputPath).Name;
+        }
+
         private async void btnRUN_Click(object sender, EventArgs e)
         {
-            await SaveBitmap(); // just for testing
+            foreach (TreeNode layerNode in treeView.Nodes)
+            {
+                if (!layerNode.Checked) { continue; }
+                Layer? layer = _uMapData?.Layers.FirstOrDefault(layer => layer.UmapOptions.Name.Equals(layerNode.Name));
+                _selectedLayerOptions = layer?.UmapOptions;
+
+                foreach (TreeNode polyNode in layerNode.Nodes)
+                {
+                    if (!polyNode.Checked) { continue; }
+                    _selectedPolygon = layer?.Features.FirstOrDefault(feature => feature.Properties.Get("name").Equals(polyNode.Name));
+
+                    LoadMap();
+                    await SaveBitmap();
+                    System.Threading.Thread.Sleep(1200);
+                }
+            }
+
+
+            //await SaveBitmap(); // just for testing
         }
 
         private async Task SaveBitmap()
         {
+            if (_selectedPolygon is null) { return; }
+
             PageCapture pageCaptureSettings = new PageCapture() // in the future take this from settings
             {
                 Format = PageCaptureType.Png,
@@ -567,8 +598,16 @@ namespace uMap2Bitmap.Forms
             using (MemoryStream memoryStream = new MemoryStream(Convert.FromBase64String(imgData)))
             {
                 string format = pageCaptureSettings.Format.ToString().ToLower();
+                string filePath = Path.Combine(_outputPath,
+                    "uMap2Bitmap export", // in the future take this from settings
+                    _selectedLayerOptions.Name.RemoveInvalidChars(),
+                    _selectedPolygon.Properties.Get("name").RemoveInvalidChars() + $".{format}");
+                Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+
+                if (File.Exists(filePath)) { } // do something... ??
+
                 Image image = Image.FromStream(memoryStream);
-                image.Save($"Capture.{format}", Helpers.ParseImageFormat(format));
+                image.Save(filePath, Helpers.ParseImageFormat(format));
             }
         }
 
@@ -729,10 +768,10 @@ namespace uMap2Bitmap.Forms
             if (_selectedLayerOptions is not null)
             {
                 layerName = _selectedLayerOptions.Name;
-                layerDescription = _selectedLayerOptions.Description.ReplaceIfEmpty("");
-                layerColor = _selectedLayerOptions.Color.ReplaceIfEmpty("");
+                layerDescription = _selectedLayerOptions.Description.ReplaceIfEmpty(replacement: "");
+                layerColor = _selectedLayerOptions.Color.ReplaceIfEmpty(replacement: "");
                 layerFill = _selectedLayerOptions.Fill.ToStringSafely(valueIfNull: "");
-                layerFillColor = _selectedLayerOptions.FillColor.ReplaceIfEmpty("");
+                layerFillColor = _selectedLayerOptions.FillColor.ReplaceIfEmpty(replacement: "");
                 layerFillOpacity = _selectedLayerOptions.FillOpacity.ToStringSafely(valueIfNull: "");
             }
             #endregion
@@ -908,6 +947,40 @@ namespace uMap2Bitmap.Forms
             if (dgvGlobalTags.Rows.Count == 0 || dgvGlobalTags.SelectedRows[0].Cells["TagName"].Value.ToStringSafely().INOE()) { return; }
             Clipboard.Clear();
             Clipboard.SetText($"{{{{{dgvGlobalTags.SelectedRows[0].Cells["TagName"].Value.ToStringSafely()}}}}}");
+        }
+
+        private void btnSettings_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnOutput_Click(object sender, EventArgs e)
+        {
+            if (ModifierKeys.HasFlag(Keys.Control))
+            {
+                SetDefaultOutputDirectory();
+            }
+            else
+            {
+                if (folderBrowserDialog.ShowDialog(this) == DialogResult.OK)
+                {
+                    _outputPath = folderBrowserDialog.SelectedPath;
+                    lblOutput.Text = new DirectoryInfo(_outputPath).Name;
+                }
+            }
+        }
+
+        private void lblOutput_Click(object sender, EventArgs e)
+        {
+            if (ModifierKeys.HasFlag(Keys.Control))
+            {
+                Clipboard.Clear();
+                Clipboard.SetText(_outputPath);
+            }
+            else
+            {
+                if (Directory.Exists(_outputPath)) { Process.Start("explorer.exe", _outputPath); }
+            }
         }
     }
 }

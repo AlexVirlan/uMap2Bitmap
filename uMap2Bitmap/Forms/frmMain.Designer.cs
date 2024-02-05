@@ -29,13 +29,13 @@
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
-            DataGridViewCellStyle dataGridViewCellStyle13 = new DataGridViewCellStyle();
-            DataGridViewCellStyle dataGridViewCellStyle14 = new DataGridViewCellStyle();
-            DataGridViewCellStyle dataGridViewCellStyle15 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
-            DataGridViewCellStyle dataGridViewCellStyle16 = new DataGridViewCellStyle();
-            DataGridViewCellStyle dataGridViewCellStyle17 = new DataGridViewCellStyle();
-            DataGridViewCellStyle dataGridViewCellStyle18 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle4 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle5 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle6 = new DataGridViewCellStyle();
             pnlMain = new Panel();
             pnlTags = new Panel();
             pnlGlobalTags = new Panel();
@@ -48,9 +48,13 @@
             btnAddGlobalTag = new Button();
             chkIgnoreTagCase = new CheckBox();
             lblGlobalTagsInfo = new Label();
+            label22 = new Label();
             label21 = new Label();
             pnlExport = new Panel();
+            btnOutput = new Button();
+            btnSettings = new Button();
             btnRUN = new Button();
+            lblOutput = new Label();
             pnlTemplates = new Panel();
             cmbTemplates = new ComboBox();
             cmbTextEditors = new ComboBox();
@@ -122,7 +126,7 @@
             pnlDragDrop = new Panel();
             pnlAppSettings = new Panel();
             colorDialog = new ColorDialog();
-            label22 = new Label();
+            folderBrowserDialog = new FolderBrowserDialog();
             pnlMain.SuspendLayout();
             pnlTags.SuspendLayout();
             pnlGlobalTags.SuspendLayout();
@@ -201,31 +205,31 @@
             dgvGlobalTags.AllowUserToAddRows = false;
             dgvGlobalTags.AllowUserToDeleteRows = false;
             dgvGlobalTags.AllowUserToResizeRows = false;
-            dataGridViewCellStyle13.BackColor = Color.FromArgb(17, 17, 17);
-            dataGridViewCellStyle13.ForeColor = Color.White;
-            dataGridViewCellStyle13.SelectionBackColor = Color.FromArgb(60, 60, 60);
-            dataGridViewCellStyle13.SelectionForeColor = Color.White;
-            dgvGlobalTags.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle13;
+            dataGridViewCellStyle1.BackColor = Color.FromArgb(17, 17, 17);
+            dataGridViewCellStyle1.ForeColor = Color.White;
+            dataGridViewCellStyle1.SelectionBackColor = Color.FromArgb(60, 60, 60);
+            dataGridViewCellStyle1.SelectionForeColor = Color.White;
+            dgvGlobalTags.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
             dgvGlobalTags.BackgroundColor = Color.FromArgb(17, 17, 17);
             dgvGlobalTags.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
-            dataGridViewCellStyle14.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle14.BackColor = Color.FromArgb(17, 17, 17);
-            dataGridViewCellStyle14.Font = new Font("Segoe UI", 9F);
-            dataGridViewCellStyle14.ForeColor = Color.White;
-            dataGridViewCellStyle14.SelectionBackColor = Color.FromArgb(17, 17, 17);
-            dataGridViewCellStyle14.SelectionForeColor = Color.White;
-            dataGridViewCellStyle14.WrapMode = DataGridViewTriState.True;
-            dgvGlobalTags.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle14;
+            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = Color.FromArgb(17, 17, 17);
+            dataGridViewCellStyle2.Font = new Font("Segoe UI", 9F);
+            dataGridViewCellStyle2.ForeColor = Color.White;
+            dataGridViewCellStyle2.SelectionBackColor = Color.FromArgb(17, 17, 17);
+            dataGridViewCellStyle2.SelectionForeColor = Color.White;
+            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.True;
+            dgvGlobalTags.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
             dgvGlobalTags.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvGlobalTags.Columns.AddRange(new DataGridViewColumn[] { TagName, TagValue });
-            dataGridViewCellStyle15.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle15.BackColor = Color.FromArgb(17, 17, 17);
-            dataGridViewCellStyle15.Font = new Font("Segoe UI", 9F);
-            dataGridViewCellStyle15.ForeColor = Color.White;
-            dataGridViewCellStyle15.SelectionBackColor = Color.FromArgb(60, 60, 60);
-            dataGridViewCellStyle15.SelectionForeColor = Color.White;
-            dataGridViewCellStyle15.WrapMode = DataGridViewTriState.False;
-            dgvGlobalTags.DefaultCellStyle = dataGridViewCellStyle15;
+            dataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle3.BackColor = Color.FromArgb(17, 17, 17);
+            dataGridViewCellStyle3.Font = new Font("Segoe UI", 9F);
+            dataGridViewCellStyle3.ForeColor = Color.White;
+            dataGridViewCellStyle3.SelectionBackColor = Color.FromArgb(60, 60, 60);
+            dataGridViewCellStyle3.SelectionForeColor = Color.White;
+            dataGridViewCellStyle3.WrapMode = DataGridViewTriState.False;
+            dgvGlobalTags.DefaultCellStyle = dataGridViewCellStyle3;
             dgvGlobalTags.Dock = DockStyle.Fill;
             dgvGlobalTags.EditMode = DataGridViewEditMode.EditProgrammatically;
             dgvGlobalTags.EnableHeadersVisualStyles = false;
@@ -337,6 +341,15 @@
             lblGlobalTagsInfo.Text = "Info";
             lblGlobalTagsInfo.Click += lblGlobalTagsInfo_Click;
             // 
+            // label22
+            // 
+            label22.AutoSize = true;
+            label22.Location = new Point(187, 35);
+            label22.Name = "label22";
+            label22.Size = new Size(244, 15);
+            label22.TabIndex = 8;
+            label22.Text = "(double click on a row to copy the tag name)";
+            // 
             // label21
             // 
             label21.AutoSize = true;
@@ -349,11 +362,47 @@
             // pnlExport
             // 
             pnlExport.BorderStyle = BorderStyle.FixedSingle;
+            pnlExport.Controls.Add(btnOutput);
+            pnlExport.Controls.Add(btnSettings);
             pnlExport.Controls.Add(btnRUN);
+            pnlExport.Controls.Add(lblOutput);
             pnlExport.Location = new Point(8, 708);
             pnlExport.Name = "pnlExport";
             pnlExport.Size = new Size(906, 45);
             pnlExport.TabIndex = 16;
+            // 
+            // btnOutput
+            // 
+            btnOutput.BackColor = Color.FromArgb(17, 17, 17);
+            btnOutput.Cursor = Cursors.Hand;
+            btnOutput.FlatAppearance.BorderColor = Color.FromArgb(64, 64, 64);
+            btnOutput.FlatAppearance.MouseDownBackColor = Color.FromArgb(126, 126, 126);
+            btnOutput.FlatAppearance.MouseOverBackColor = Color.FromArgb(64, 64, 64);
+            btnOutput.FlatStyle = FlatStyle.Flat;
+            btnOutput.Location = new Point(77, 9);
+            btnOutput.Name = "btnOutput";
+            btnOutput.Size = new Size(61, 25);
+            btnOutput.TabIndex = 1;
+            btnOutput.Text = "Output";
+            toolTips.SetToolTip(btnOutput, "Click to browse for an output directory.\r\nCTRL + click to set the output directory to the same one as the current uMap file.");
+            btnOutput.UseVisualStyleBackColor = false;
+            btnOutput.Click += btnOutput_Click;
+            // 
+            // btnSettings
+            // 
+            btnSettings.BackColor = Color.FromArgb(17, 17, 17);
+            btnSettings.Cursor = Cursors.Hand;
+            btnSettings.FlatAppearance.BorderColor = Color.FromArgb(64, 64, 64);
+            btnSettings.FlatAppearance.MouseDownBackColor = Color.FromArgb(126, 126, 126);
+            btnSettings.FlatAppearance.MouseOverBackColor = Color.FromArgb(64, 64, 64);
+            btnSettings.FlatStyle = FlatStyle.Flat;
+            btnSettings.Location = new Point(9, 9);
+            btnSettings.Name = "btnSettings";
+            btnSettings.Size = new Size(61, 25);
+            btnSettings.TabIndex = 1;
+            btnSettings.Text = "Settings";
+            btnSettings.UseVisualStyleBackColor = false;
+            btnSettings.Click += btnSettings_Click;
             // 
             // btnRUN
             // 
@@ -364,14 +413,27 @@
             btnRUN.FlatAppearance.MouseDownBackColor = Color.FromArgb(126, 126, 126);
             btnRUN.FlatAppearance.MouseOverBackColor = Color.FromArgb(64, 64, 64);
             btnRUN.FlatStyle = FlatStyle.Flat;
-            btnRUN.Location = new Point(828, 10);
+            btnRUN.Location = new Point(828, 9);
             btnRUN.Name = "btnRUN";
-            btnRUN.Size = new Size(66, 23);
+            btnRUN.Size = new Size(66, 25);
             btnRUN.TabIndex = 1;
             btnRUN.Text = "R U N";
             toolTips.SetToolTip(btnRUN, "Process all the selected polygons \r\nand transform them into bitmaps (images).");
             btnRUN.UseVisualStyleBackColor = false;
             btnRUN.Click += btnRUN_Click;
+            // 
+            // lblOutput
+            // 
+            lblOutput.AutoSize = true;
+            lblOutput.Cursor = Cursors.Hand;
+            lblOutput.Font = new Font("Segoe UI", 9F, FontStyle.Underline);
+            lblOutput.Location = new Point(144, 14);
+            lblOutput.Name = "lblOutput";
+            lblOutput.Size = new Size(12, 15);
+            lblOutput.TabIndex = 10;
+            lblOutput.Text = "-";
+            toolTips.SetToolTip(lblOutput, "Click to open the directory.\r\nCTRL + click to copy the path to the clipboard.");
+            lblOutput.Click += lblOutput_Click;
             // 
             // pnlTemplates
             // 
@@ -820,7 +882,7 @@
             label20.Name = "label20";
             label20.Size = new Size(511, 17);
             label20.TabIndex = 2;
-            label20.Text = "Settings / configurations";
+            label20.Text = "Properties and configurations";
             label20.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // lblTemplatesInfo
@@ -978,31 +1040,31 @@
             dgvProperties.AllowUserToAddRows = false;
             dgvProperties.AllowUserToDeleteRows = false;
             dgvProperties.AllowUserToResizeRows = false;
-            dataGridViewCellStyle16.BackColor = Color.FromArgb(17, 17, 17);
-            dataGridViewCellStyle16.ForeColor = Color.White;
-            dataGridViewCellStyle16.SelectionBackColor = Color.FromArgb(60, 60, 60);
-            dataGridViewCellStyle16.SelectionForeColor = Color.White;
-            dgvProperties.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle16;
+            dataGridViewCellStyle4.BackColor = Color.FromArgb(17, 17, 17);
+            dataGridViewCellStyle4.ForeColor = Color.White;
+            dataGridViewCellStyle4.SelectionBackColor = Color.FromArgb(60, 60, 60);
+            dataGridViewCellStyle4.SelectionForeColor = Color.White;
+            dgvProperties.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle4;
             dgvProperties.BackgroundColor = Color.FromArgb(17, 17, 17);
             dgvProperties.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
-            dataGridViewCellStyle17.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle17.BackColor = Color.FromArgb(17, 17, 17);
-            dataGridViewCellStyle17.Font = new Font("Segoe UI", 9F);
-            dataGridViewCellStyle17.ForeColor = Color.White;
-            dataGridViewCellStyle17.SelectionBackColor = Color.FromArgb(17, 17, 17);
-            dataGridViewCellStyle17.SelectionForeColor = Color.White;
-            dataGridViewCellStyle17.WrapMode = DataGridViewTriState.True;
-            dgvProperties.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle17;
+            dataGridViewCellStyle5.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle5.BackColor = Color.FromArgb(17, 17, 17);
+            dataGridViewCellStyle5.Font = new Font("Segoe UI", 9F);
+            dataGridViewCellStyle5.ForeColor = Color.White;
+            dataGridViewCellStyle5.SelectionBackColor = Color.FromArgb(17, 17, 17);
+            dataGridViewCellStyle5.SelectionForeColor = Color.White;
+            dataGridViewCellStyle5.WrapMode = DataGridViewTriState.True;
+            dgvProperties.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle5;
             dgvProperties.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvProperties.Columns.AddRange(new DataGridViewColumn[] { PropertyName, PropertyValue });
-            dataGridViewCellStyle18.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle18.BackColor = Color.FromArgb(17, 17, 17);
-            dataGridViewCellStyle18.Font = new Font("Segoe UI", 9F);
-            dataGridViewCellStyle18.ForeColor = Color.White;
-            dataGridViewCellStyle18.SelectionBackColor = Color.FromArgb(60, 60, 60);
-            dataGridViewCellStyle18.SelectionForeColor = Color.White;
-            dataGridViewCellStyle18.WrapMode = DataGridViewTriState.False;
-            dgvProperties.DefaultCellStyle = dataGridViewCellStyle18;
+            dataGridViewCellStyle6.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle6.BackColor = Color.FromArgb(17, 17, 17);
+            dataGridViewCellStyle6.Font = new Font("Segoe UI", 9F);
+            dataGridViewCellStyle6.ForeColor = Color.White;
+            dataGridViewCellStyle6.SelectionBackColor = Color.FromArgb(60, 60, 60);
+            dataGridViewCellStyle6.SelectionForeColor = Color.White;
+            dataGridViewCellStyle6.WrapMode = DataGridViewTriState.False;
+            dgvProperties.DefaultCellStyle = dataGridViewCellStyle6;
             dgvProperties.Dock = DockStyle.Fill;
             dgvProperties.EditMode = DataGridViewEditMode.EditProgrammatically;
             dgvProperties.EnableHeadersVisualStyles = false;
@@ -1223,14 +1285,10 @@
             // 
             colorDialog.Color = Color.FromArgb(26, 26, 26);
             // 
-            // label22
+            // folderBrowserDialog
             // 
-            label22.AutoSize = true;
-            label22.Location = new Point(187, 35);
-            label22.Name = "label22";
-            label22.Size = new Size(244, 15);
-            label22.TabIndex = 8;
-            label22.Text = "(double click on a row to copy the tag name)";
+            folderBrowserDialog.Description = "Select an output directory";
+            folderBrowserDialog.UseDescriptionForTitle = true;
             // 
             // frmMain
             // 
@@ -1258,6 +1316,7 @@
             pnlGlobalTags.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)dgvGlobalTags).EndInit();
             pnlExport.ResumeLayout(false);
+            pnlExport.PerformLayout();
             pnlTemplates.ResumeLayout(false);
             pnlTemplates.PerformLayout();
             pnlUMapProperties.ResumeLayout(false);
@@ -1363,5 +1422,9 @@
         private DataGridViewTextBoxColumn TagValue;
         private Label label20;
         private Label label22;
+        private Button btnSettings;
+        private Button btnOutput;
+        private Label lblOutput;
+        private FolderBrowserDialog folderBrowserDialog;
     }
 }

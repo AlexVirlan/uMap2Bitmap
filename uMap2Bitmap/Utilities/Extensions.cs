@@ -26,6 +26,11 @@ namespace uMap2Bitmap.Utilities
             return 0;
         }
 
+        public static string RemoveInvalidChars(this string str)
+        {
+            return string.Concat(str.Split(Path.GetInvalidFileNameChars()));
+        }
+
         public static string Repeat(this string s, int n) => new StringBuilder(s.Length * n).Insert(0, s, n).ToString();
 
         public static string? Repeat(this string? str, int times = 2, StringRepeatType repeatType = StringRepeatType.SBInsert)
