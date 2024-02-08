@@ -54,6 +54,7 @@
             Controls.Add(webView);
             ForeColor = Color.White;
             Name = "frmBrowser";
+            Opacity = 0D;
             Text = "uMap2Bitmap - Map window";
             FormClosing += frmBrowser_FormClosing;
             Load += frmBrowser_Load;

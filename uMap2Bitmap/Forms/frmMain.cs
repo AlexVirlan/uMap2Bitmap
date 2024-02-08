@@ -572,7 +572,83 @@ namespace uMap2Bitmap.Forms
             #endregion
 
             // blocheaza panouri si btn UI + btn de pauza si stop/cancel
-            //backgroundWorker.RunWorkerAsync();
+
+            #region Testing - working method
+            //foreach (TreeNode layerNode in treeView.Nodes)
+            //{
+            //    if (!layerNode.Checked) { continue; }
+            //    Layer? layer = _uMapData?.Layers.FirstOrDefault(layer => layer.UmapOptions.Name.Equals(layerNode.Name));
+            //    _selectedLayerOptions = layer?.UmapOptions;
+
+            //    foreach (TreeNode polyNode in layerNode.Nodes)
+            //    {
+            //        if (!polyNode.Checked) { continue; }
+            //        _selectedPolygon = layer?.Features.FirstOrDefault(feature => feature.Properties.Get("name").Equals(polyNode.Name));
+
+            //        LoadMap();
+            //        Sleep(1500);
+            //        var vvv = SaveBitmap();
+            //        Sleep(100);
+            //        var aaa = vvv.Result;
+            //        Sleep(500);
+            //    }
+            //}
+            #endregion
+
+            Export();
+        }
+
+        private void Export()
+        {
+            int exportedPolygons = 0;
+            Globals.ExportErrors = new Dictionary<string, List<(string polygonName, string error)>>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (TreeNode layerNode in treeView.Nodes)
+            {
+                if (!layerNode.Checked) { continue; }
+                Layer? layer = _uMapData?.Layers.FirstOrDefault(layer => layer.UmapOptions.Name.Equals(layerNode.Name));
+                _selectedLayerOptions = layer?.UmapOptions;
+
+                foreach (TreeNode polyNode in layerNode.Nodes)
+                {
+                    if (!polyNode.Checked) { continue; }
+                    _selectedPolygon = layer?.Features.FirstOrDefault(feature => feature.Properties.Get("name").Equals(polyNode.Name));
+
+                    FunctionResponse frLoadMap = LoadMap();
+                    if (frLoadMap.Error)
+                    {
+                        AddExportLog(_selectedLayerOptions.Name, _selectedPolygon.Properties.Get("name"), frLoadMap.Message);
+                        continue; // or stop ? (settings)
+                    }
+
+                    Sleep(1500);
+
+                    Task<FunctionResponse> saveTask = SaveBitmap();
+                    Sleep(250);
+                    FunctionResponse frSaveBitmap = saveTask.Result;
+                    if (frSaveBitmap.Error)
+                    {
+                        AddExportLog(_selectedLayerOptions.Name, _selectedPolygon.Properties.Get("name"), frSaveBitmap.Message);
+                        continue; // or stop ? (settings)
+                    }
+
+                    exportedPolygons++;
+                    //backgroundWorker.ReportProgress(exportedPolygons); // map % from current poly / total polys
+                    int percentage = exportedPolygons.Map(0, _checkedPolygons, 0, 100);
+                    lblStatus.Text = $"Exported {exportedPolygons}/{_checkedPolygons} ({percentage}%)";
+
+                    Sleep(250);
+                }
+            }
+
+            Sleep(500);
+            // deblocheaza UI si butoane, deschide folder destinatie. update lblStatus (dupa pune-l in idle)
+            lblStatus.Text = "Done";
+            if (Globals.ExportErrors.Count > 0)
+            {
+                // notifica si intreaba daca vrea detalii
+                lblStatus.Text = "Done with errors...";
+            }
         }
 
         private void Sleep(int interval)
@@ -1018,63 +1094,17 @@ namespace uMap2Bitmap.Forms
 
         private void backgroundWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            int exportedPolygons = 0;
-            Globals.ExportErrors = new Dictionary<string, List<(string polygonName, string error)>>(StringComparer.OrdinalIgnoreCase);
 
-            foreach (TreeNode layerNode in treeView.Nodes)
-            {
-                if (!layerNode.Checked) { continue; }
-                Layer? layer = _uMapData?.Layers.FirstOrDefault(layer => layer.UmapOptions.Name.Equals(layerNode.Name));
-                _selectedLayerOptions = layer?.UmapOptions;
-
-                foreach (TreeNode polyNode in layerNode.Nodes)
-                {
-                    if (!polyNode.Checked) { continue; }
-                    _selectedPolygon = layer?.Features.FirstOrDefault(feature => feature.Properties.Get("name").Equals(polyNode.Name));
-
-                    FunctionResponse frLoadMap = new FunctionResponse();
-                    this.Invoke(new MethodInvoker(delegate () { frLoadMap = LoadMap(); }));
-
-                    if (frLoadMap.Error)
-                    {
-                        AddExportLog(_selectedLayerOptions.Name, _selectedPolygon.Properties.Get("name"), frLoadMap.Message);
-                        continue; // or stop ? (settings)
-                    }
-
-                    Sleep(1500);
-
-                    FunctionResponse frSaveBitmap = new FunctionResponse();
-                    //this.Invoke(new MethodInvoker(delegate () { frSaveBitmap = SaveBitmap(); }));
-                    frSaveBitmap = SaveBitmap().Result;
-
-                    if (frSaveBitmap.Error)
-                    {
-                        AddExportLog(_selectedLayerOptions.Name, _selectedPolygon.Properties.Get("name"), frSaveBitmap.Message);
-                        continue; // or stop ? (settings)
-                    }
-
-                    Sleep(500);
-
-                    exportedPolygons++;
-                    backgroundWorker.ReportProgress(exportedPolygons); // map % from current poly / total polys
-                }
-            }
         }
 
         private void backgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            int percentage = e.ProgressPercentage.Map(0, _checkedPolygons, 0, 100);
-            lblStatus.Text = $"Exported {e.ProgressPercentage}/{_checkedPolygons} ({percentage}%)";
+
         }
 
         private void backgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            // deblocheaza UI si butoane, deschide folder destinatie. update lblStatus (dupa pune-l in idle)
-            lblStatus.Text = "Done";
-            if (Globals.ExportErrors.Count > 0)
-            {
-                // notifica si intreaba daca vrea detalii
-            }
+
         }
 
         private void AddExportLog(string layer, string polygon, string error)

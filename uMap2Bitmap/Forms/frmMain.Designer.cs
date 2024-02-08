@@ -51,6 +51,7 @@
             label22 = new Label();
             label21 = new Label();
             pnlExport = new Panel();
+            lblStatus = new Label();
             btnOutput = new Button();
             btnSettings = new Button();
             btnRUN = new Button();
@@ -128,7 +129,6 @@
             colorDialog = new ColorDialog();
             folderBrowserDialog = new FolderBrowserDialog();
             backgroundWorker = new System.ComponentModel.BackgroundWorker();
-            lblStatus = new Label();
             pnlMain.SuspendLayout();
             pnlTags.SuspendLayout();
             pnlGlobalTags.SuspendLayout();
@@ -373,6 +373,16 @@
             pnlExport.Name = "pnlExport";
             pnlExport.Size = new Size(906, 45);
             pnlExport.TabIndex = 16;
+            // 
+            // lblStatus
+            // 
+            lblStatus.AutoSize = true;
+            lblStatus.Location = new Point(428, 19);
+            lblStatus.Name = "lblStatus";
+            lblStatus.Size = new Size(26, 15);
+            lblStatus.TabIndex = 11;
+            lblStatus.Text = "Idle";
+            lblStatus.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // btnOutput
             // 
@@ -1300,16 +1310,6 @@
             backgroundWorker.ProgressChanged += backgroundWorker_ProgressChanged;
             backgroundWorker.RunWorkerCompleted += backgroundWorker_RunWorkerCompleted;
             // 
-            // lblStatus
-            // 
-            lblStatus.AutoSize = true;
-            lblStatus.Location = new Point(428, 19);
-            lblStatus.Name = "lblStatus";
-            lblStatus.Size = new Size(26, 15);
-            lblStatus.TabIndex = 11;
-            lblStatus.Text = "Idle";
-            lblStatus.TextAlign = ContentAlignment.MiddleCenter;
-            // 
             // frmMain
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -1324,6 +1324,7 @@
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             Name = "frmMain";
+            Opacity = 0D;
             StartPosition = FormStartPosition.CenterScreen;
             Text = "uMap2Bitmap";
             FormClosing += frmMain_FormClosing;
