@@ -572,7 +572,7 @@ namespace uMap2Bitmap.Forms
             #endregion
 
             // blocheaza panouri si btn UI + btn de pauza si stop/cancel
-            backgroundWorker.RunWorkerAsync();
+            //backgroundWorker.RunWorkerAsync();
         }
 
         private void Sleep(int interval)
@@ -586,7 +586,7 @@ namespace uMap2Bitmap.Forms
             stopwatch.Stop();
         }
 
-        private FunctionResponse SaveBitmap()
+        private async Task<FunctionResponse> SaveBitmap()
         {
             try
             {
@@ -602,56 +602,7 @@ namespace uMap2Bitmap.Forms
                 };
                 string pageCaptureStr = JsonConvert.SerializeObject(pageCaptureSettings, Formatting.None);
 
-                string devData = "";
-
-                var vvv = _frmBrowser.webView.CoreWebView2.CallDevToolsProtocolMethodAsync("Page.captureScreenshot", pageCaptureStr).ConfigureAwait(false).GetAwaiter().GetResult();
-
-                //var task = Task.Run(async () => await _frmBrowser.webView.CoreWebView2.CallDevToolsProtocolMethodAsync("Page.captureScreenshot", pageCaptureStr));
-                //var result = task.Result;
-
-                //var vvv = _frmBrowser.webView.CoreWebView2.CallDevToolsProtocolMethodAsync("Page.captureScreenshot", pageCaptureStr).GetAwaiter().GetResult();
-                //var vvv = _frmBrowser.webView.CoreWebView2.CallDevToolsProtocolMethodAsync("Page.captureScreenshot", pageCaptureStr);
-                //var xxx = vvv.Result;
-
-                //var task = Task.Run(() => _frmBrowser.webView.CoreWebView2.CallDevToolsProtocolMethodAsync("Page.captureScreenshot", pageCaptureStr));
-                //task.Wait();
-                //var asd = task.Result;
-
-                //var task = Task.Run(() =>
-                //this.Invoke(new MethodInvoker(delegate () { _frmBrowser.webView.CoreWebView2.CallDevToolsProtocolMethodAsync("Page.captureScreenshot", pageCaptureStr); }))
-                //);
-                //task.Wait();
-                //var asd = task.Result;
-
-                //var task = Task.Run(async () => { await _frmBrowser.webView.CoreWebView2.CallDevToolsProtocolMethodAsync("Page.captureScreenshot", pageCaptureStr); });
-                //task.Wait();
-
-                //string devData = "";
-                //this.Invoke(new MethodInvoker(delegate ()
-                //{
-                //    var task = Task.Run(async () => await _frmBrowser.webView.CoreWebView2.CallDevToolsProtocolMethodAsync("Page.captureScreenshot", pageCaptureStr));
-                //    var result = task.Result;
-                //    devData = result;
-                //}));
-
-                //this.Invoke(new MethodInvoker(delegate ()
-                //{
-                //    var task = Task.Run(() => _frmBrowser.webView.CoreWebView2.CallDevToolsProtocolMethodAsync("Page.captureScreenshot", pageCaptureStr));
-                //    var result = task.Result;
-                //    devData = result;
-                //}));
-
-                //_frmBrowser.Invoke(new MethodInvoker(delegate ()
-                //{
-                //    //var vvv = _frmBrowser.webView.CoreWebView2.CallDevToolsProtocolMethodAsync("Page.captureScreenshot", pageCaptureStr).Result;
-                //    var task = Task.Run(async () => await _frmBrowser.webView.CoreWebView2.CallDevToolsProtocolMethodAsync("Page.captureScreenshot", pageCaptureStr));
-                //    var result = task.Result;
-                //    devData = result;
-                //}));
-
-                // fa poza din FRM si ia-o pintr-o metoda aici
-                //var vvv = _frmBrowser.GetCapture(pageCaptureStr);
-
+                string devData = await _frmBrowser.webView.CoreWebView2.CallDevToolsProtocolMethodAsync("Page.captureScreenshot", pageCaptureStr);
                 string imgData = JObject.Parse(devData)["data"].ToString();
                 if (imgData.INOE()) { return new FunctionResponse(error: true, message: "The capture data is empty."); }
 
@@ -1093,8 +1044,8 @@ namespace uMap2Bitmap.Forms
                     Sleep(1500);
 
                     FunctionResponse frSaveBitmap = new FunctionResponse();
-                    this.Invoke(new MethodInvoker(delegate () { frSaveBitmap = SaveBitmap(); }));
-                    //frSaveBitmap = SaveBitmap();
+                    //this.Invoke(new MethodInvoker(delegate () { frSaveBitmap = SaveBitmap(); }));
+                    frSaveBitmap = SaveBitmap().Result;
 
                     if (frSaveBitmap.Error)
                     {
