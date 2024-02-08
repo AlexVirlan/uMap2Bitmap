@@ -11,7 +11,6 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -19,8 +18,6 @@ using System.Windows.Forms;
 using uMap2Bitmap.Controls;
 using uMap2Bitmap.Entities;
 using uMap2Bitmap.Utilities;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace uMap2Bitmap.Forms
 {
@@ -29,10 +26,12 @@ namespace uMap2Bitmap.Forms
         #region Variables
         private int _layersCount = 0;
         private int _polysCount = 0;
+        private int _checkedPolygons = 0;
         private string _appTitle = "uMap2Bitmap";
-        private string _NL = Environment.NewLine;
         private string _outputPath = string.Empty;
         private string _currentFilePath = string.Empty;
+        private string _templateFileData = string.Empty;
+        private string _NL = Environment.NewLine;
         private bool _modifiedByCode = false;
         private UMapData? _uMapData = null;
         private UmapOptions? _selectedLayerOptions = null;
@@ -368,9 +367,9 @@ namespace uMap2Bitmap.Forms
         private void UpdateStatistics()
         {
             int checkedLayers = treeView.Nodes.Cast<TreeNode>().Where(node => node.Checked).Count();
-            int checkedPolygons = treeView.Descendants().Where(node => node.Checked && node.Parent != null).Count();
-            lblStatistics.Text = $"Checked layers: {checkedLayers}/{_layersCount}  |  Checked polygons: {checkedPolygons}/{_polysCount}";
-            btnRUN.Enabled = checkedLayers > 0 && checkedPolygons > 0;
+            _checkedPolygons = treeView.Descendants().Where(node => node.Checked && node.Parent != null).Count();
+            lblStatistics.Text = $"Checked layers: {checkedLayers}/{_layersCount}  |  Checked polygons: {_checkedPolygons}/{_polysCount}";
+            btnRUN.Enabled = checkedLayers > 0 && _checkedPolygons > 0;
         }
 
         private void ShowMessage(string message, MessageBoxIcon icon = MessageBoxIcon.Information, string title = "")
@@ -556,65 +555,147 @@ namespace uMap2Bitmap.Forms
             lblOutput.Text = new DirectoryInfo(_outputPath).Name;
         }
 
-        private async void btnRUN_Click(object sender, EventArgs e)
+        private void btnRUN_Click(object sender, EventArgs e)
         {
-            foreach (TreeNode layerNode in treeView.Nodes)
+            #region Validations
+            if (cmbTemplates.SelectedIndex < 0)
             {
-                if (!layerNode.Checked) { continue; }
-                Layer? layer = _uMapData?.Layers.FirstOrDefault(layer => layer.UmapOptions.Name.Equals(layerNode.Name));
-                _selectedLayerOptions = layer?.UmapOptions;
-
-                foreach (TreeNode polyNode in layerNode.Nodes)
-                {
-                    if (!polyNode.Checked) { continue; }
-                    _selectedPolygon = layer?.Features.FirstOrDefault(feature => feature.Properties.Get("name").Equals(polyNode.Name));
-
-                    LoadMap();
-                    await SaveBitmap();
-                    System.Threading.Thread.Sleep(1200);
-                }
+                ShowMessage("Please select a template first.", MessageBoxIcon.Warning);
+                return;
             }
 
+            if (_templateFileData.INOE()) // dezactiveaza si btnStart sau verifica inca o data acolo la click
+            {
+                ShowMessage("The selected template is empty.", MessageBoxIcon.Warning);
+                return;
+            }
+            #endregion
 
-            //await SaveBitmap(); // just for testing
+            // blocheaza panouri si btn UI + btn de pauza si stop/cancel
+            backgroundWorker.RunWorkerAsync();
         }
 
-        private async Task SaveBitmap()
+        private void Sleep(int interval)
         {
-            if (_selectedPolygon is null) { return; }
-
-            PageCapture pageCaptureSettings = new PageCapture() // in the future take this from settings
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            while (stopwatch.ElapsedMilliseconds < interval)
             {
-                Format = PageCaptureType.Png,
-                Quality = 100,
-                FromSurface = true,
-                CaptureBeyondViewport = true,
-                OptimizeForSpeed = false
-            };
-            string pageCaptureStr = JsonConvert.SerializeObject(pageCaptureSettings, Formatting.None);
+                Application.DoEvents();
+            }
+            stopwatch.Stop();
+        }
 
-            string devData = await _frmBrowser.webView.CoreWebView2.CallDevToolsProtocolMethodAsync("Page.captureScreenshot", pageCaptureStr);
-            string imgData = JObject.Parse(devData)["data"].ToString();
-            using (MemoryStream memoryStream = new MemoryStream(Convert.FromBase64String(imgData)))
+        private FunctionResponse SaveBitmap()
+        {
+            try
             {
-                string format = pageCaptureSettings.Format.ToString().ToLower();
-                string filePath = Path.Combine(_outputPath,
-                    "uMap2Bitmap export", // in the future take this from settings
-                    _selectedLayerOptions.Name.RemoveInvalidChars(),
-                    _selectedPolygon.Properties.Get("name").RemoveInvalidChars() + $".{format}");
-                Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+                if (_selectedPolygon is null) { return new FunctionResponse(error: true, message: "The selected polygon is null."); }
 
-                if (File.Exists(filePath)) { } // do something... ??
+                PageCapture pageCaptureSettings = new PageCapture() // in the future take this from settings
+                {
+                    Format = PageCaptureType.Png,
+                    Quality = 100,
+                    FromSurface = true,
+                    CaptureBeyondViewport = true,
+                    OptimizeForSpeed = false
+                };
+                string pageCaptureStr = JsonConvert.SerializeObject(pageCaptureSettings, Formatting.None);
 
-                Image image = Image.FromStream(memoryStream);
-                image.Save(filePath, Helpers.ParseImageFormat(format));
+                string devData = "";
+
+                var vvv = _frmBrowser.webView.CoreWebView2.CallDevToolsProtocolMethodAsync("Page.captureScreenshot", pageCaptureStr).ConfigureAwait(false).GetAwaiter().GetResult();
+
+                //var task = Task.Run(async () => await _frmBrowser.webView.CoreWebView2.CallDevToolsProtocolMethodAsync("Page.captureScreenshot", pageCaptureStr));
+                //var result = task.Result;
+
+                //var vvv = _frmBrowser.webView.CoreWebView2.CallDevToolsProtocolMethodAsync("Page.captureScreenshot", pageCaptureStr).GetAwaiter().GetResult();
+                //var vvv = _frmBrowser.webView.CoreWebView2.CallDevToolsProtocolMethodAsync("Page.captureScreenshot", pageCaptureStr);
+                //var xxx = vvv.Result;
+
+                //var task = Task.Run(() => _frmBrowser.webView.CoreWebView2.CallDevToolsProtocolMethodAsync("Page.captureScreenshot", pageCaptureStr));
+                //task.Wait();
+                //var asd = task.Result;
+
+                //var task = Task.Run(() =>
+                //this.Invoke(new MethodInvoker(delegate () { _frmBrowser.webView.CoreWebView2.CallDevToolsProtocolMethodAsync("Page.captureScreenshot", pageCaptureStr); }))
+                //);
+                //task.Wait();
+                //var asd = task.Result;
+
+                //var task = Task.Run(async () => { await _frmBrowser.webView.CoreWebView2.CallDevToolsProtocolMethodAsync("Page.captureScreenshot", pageCaptureStr); });
+                //task.Wait();
+
+                //string devData = "";
+                //this.Invoke(new MethodInvoker(delegate ()
+                //{
+                //    var task = Task.Run(async () => await _frmBrowser.webView.CoreWebView2.CallDevToolsProtocolMethodAsync("Page.captureScreenshot", pageCaptureStr));
+                //    var result = task.Result;
+                //    devData = result;
+                //}));
+
+                //this.Invoke(new MethodInvoker(delegate ()
+                //{
+                //    var task = Task.Run(() => _frmBrowser.webView.CoreWebView2.CallDevToolsProtocolMethodAsync("Page.captureScreenshot", pageCaptureStr));
+                //    var result = task.Result;
+                //    devData = result;
+                //}));
+
+                //_frmBrowser.Invoke(new MethodInvoker(delegate ()
+                //{
+                //    //var vvv = _frmBrowser.webView.CoreWebView2.CallDevToolsProtocolMethodAsync("Page.captureScreenshot", pageCaptureStr).Result;
+                //    var task = Task.Run(async () => await _frmBrowser.webView.CoreWebView2.CallDevToolsProtocolMethodAsync("Page.captureScreenshot", pageCaptureStr));
+                //    var result = task.Result;
+                //    devData = result;
+                //}));
+
+                // fa poza din FRM si ia-o pintr-o metoda aici
+                //var vvv = _frmBrowser.GetCapture(pageCaptureStr);
+
+                string imgData = JObject.Parse(devData)["data"].ToString();
+                if (imgData.INOE()) { return new FunctionResponse(error: true, message: "The capture data is empty."); }
+
+                using (MemoryStream memoryStream = new MemoryStream(Convert.FromBase64String(imgData)))
+                {
+                    string format = pageCaptureSettings.Format.ToString().ToLower();
+                    string filePath = Path.Combine(_outputPath,
+                        "uMap2Bitmap export", // in the future take this from settings
+                        _selectedLayerOptions.Name.RemoveInvalidChars(),
+                        _selectedPolygon.Properties.Get("name").RemoveInvalidChars() + $".{format}");
+                    Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+
+                    if (File.Exists(filePath)) { } // do something, from settings... ??
+
+                    Image image = Image.FromStream(memoryStream);
+                    image.Save(filePath, Helpers.ParseImageFormat(format));
+                }
+
+                return new FunctionResponse();
+            }
+            catch (Exception ex)
+            {
+                return new FunctionResponse(ex);
             }
         }
 
         private void cmbTemplates_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (cmbTemplates.SelectedIndex == -1)
+            if (cmbTemplates.SelectedIndex < 0)
             {
+                _frmBrowser?.LoadDefault();
+                return;
+            }
+
+            string filePath = Path.Combine(Application.StartupPath, "Templates", cmbTemplates.SelectedItem.ToStringSafely());
+            FileStream fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+            using (StreamReader streamReader = new StreamReader(fileStream, Encoding.UTF8))
+            {
+                _templateFileData = streamReader.ReadToEnd();
+            }
+
+            if (_templateFileData.INOE()) // dezactiveaza si btnStart sau verifica inca o data acolo la click
+            {
+                ShowMessage("This template is empty:" + _NL.Repeat() + filePath, MessageBoxIcon.Warning);
                 _frmBrowser?.LoadDefault();
                 return;
             }
@@ -723,40 +804,41 @@ namespace uMap2Bitmap.Forms
             return size;
         }
 
-        private void LoadMap()
+        private FunctionResponse LoadMap()
         {
-            if (cmbTemplates.SelectedIndex < 0 ||
-                cmbTemplates.SelectedItem.ToStringSafely().INOE())
-            { return; }
-
-            string filePath = Path.Combine(Application.StartupPath, "Templates", cmbTemplates.SelectedItem.ToStringSafely());
-            if (!File.Exists(filePath))
+            try
             {
-                ShowMessage("This template can't be found:" + _NL.Repeat() + filePath, MessageBoxIcon.Warning);
-                return;
-            }
+                //if (cmbTemplates.SelectedIndex < 0 ||
+                //    cmbTemplates.SelectedItem.ToStringSafely().INOE())
+                //{ return; }
 
-            string fileData;
-            FileStream fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-            using (StreamReader streamReader = new StreamReader(fileStream, Encoding.UTF8))
+                //string filePath = Path.Combine(Application.StartupPath, "Templates", cmbTemplates.SelectedItem.ToStringSafely());
+                //if (!File.Exists(filePath))
+                //{
+                //    ShowMessage("This template can't be found:" + _NL.Repeat() + filePath, MessageBoxIcon.Warning);
+                //    return;
+                //}
+
+                //FileStream fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+                //using (StreamReader streamReader = new StreamReader(fileStream, Encoding.UTF8))
+                //{
+                //    _templateFileData = streamReader.ReadToEnd();
+                //}
+
+                //if (_templateFileData.INOE())
+                //{
+                //    ShowMessage("This template is empty:" + _NL.Repeat() + filePath, MessageBoxIcon.Warning);
+                //    return;
+                //}
+
+                Size size = UpdateMapWindowsSize();
+                string processedTemplate = ProcessTags(_templateFileData, chkIgnoreTagCase.Checked, chkRemoveUnusedTags.Checked);
+                return _frmBrowser.LoadHTML(processedTemplate, size, lblMapDefaultBackgroundColor.BackColor);
+            }
+            catch (Exception ex)
             {
-                fileData = streamReader.ReadToEnd();
+                return new FunctionResponse(ex);
             }
-
-            if (fileData.INOE())
-            {
-                ShowMessage("This template is empty:" + _NL.Repeat() + filePath, MessageBoxIcon.Warning);
-                return;
-            }
-
-            //int width = numMapWidth.Value.ToInt();
-            //int height = numMapHeight.Value.ToInt();
-            //string mapSizeCustomPropValue = _selectedPolygon is null ? "" : _selectedPolygon.Properties.Get(txtMapSizeCustomProperty.Text);
-            //Size size = chkMapSizeCustomProperty.Checked ? Helpers.GetSize(mapSizeCustomPropValue, fallbackSize: new Size(width, height)) : new Size(width, height);
-            Size size = UpdateMapWindowsSize();
-
-            string processedTemplate = ProcessTags(fileData, chkIgnoreTagCase.Checked, chkRemoveUnusedTags.Checked);
-            _frmBrowser?.LoadHTML(processedTemplate, size, lblMapDefaultBackgroundColor.BackColor);
         }
 
         private string ProcessTags(string templateData, bool ignoreCase = false, bool removeOtherTags = false)
@@ -980,6 +1062,79 @@ namespace uMap2Bitmap.Forms
             else
             {
                 if (Directory.Exists(_outputPath)) { Process.Start("explorer.exe", _outputPath); }
+            }
+        }
+
+        private void backgroundWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            int exportedPolygons = 0;
+            Globals.ExportErrors = new Dictionary<string, List<(string polygonName, string error)>>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (TreeNode layerNode in treeView.Nodes)
+            {
+                if (!layerNode.Checked) { continue; }
+                Layer? layer = _uMapData?.Layers.FirstOrDefault(layer => layer.UmapOptions.Name.Equals(layerNode.Name));
+                _selectedLayerOptions = layer?.UmapOptions;
+
+                foreach (TreeNode polyNode in layerNode.Nodes)
+                {
+                    if (!polyNode.Checked) { continue; }
+                    _selectedPolygon = layer?.Features.FirstOrDefault(feature => feature.Properties.Get("name").Equals(polyNode.Name));
+
+                    FunctionResponse frLoadMap = new FunctionResponse();
+                    this.Invoke(new MethodInvoker(delegate () { frLoadMap = LoadMap(); }));
+
+                    if (frLoadMap.Error)
+                    {
+                        AddExportLog(_selectedLayerOptions.Name, _selectedPolygon.Properties.Get("name"), frLoadMap.Message);
+                        continue; // or stop ? (settings)
+                    }
+
+                    Sleep(1500);
+
+                    FunctionResponse frSaveBitmap = new FunctionResponse();
+                    this.Invoke(new MethodInvoker(delegate () { frSaveBitmap = SaveBitmap(); }));
+                    //frSaveBitmap = SaveBitmap();
+
+                    if (frSaveBitmap.Error)
+                    {
+                        AddExportLog(_selectedLayerOptions.Name, _selectedPolygon.Properties.Get("name"), frSaveBitmap.Message);
+                        continue; // or stop ? (settings)
+                    }
+
+                    Sleep(500);
+
+                    exportedPolygons++;
+                    backgroundWorker.ReportProgress(exportedPolygons); // map % from current poly / total polys
+                }
+            }
+        }
+
+        private void backgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            int percentage = e.ProgressPercentage.Map(0, _checkedPolygons, 0, 100);
+            lblStatus.Text = $"Exported {e.ProgressPercentage}/{_checkedPolygons} ({percentage}%)";
+        }
+
+        private void backgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            // deblocheaza UI si butoane, deschide folder destinatie. update lblStatus (dupa pune-l in idle)
+            lblStatus.Text = "Done";
+            if (Globals.ExportErrors.Count > 0)
+            {
+                // notifica si intreaba daca vrea detalii
+            }
+        }
+
+        private void AddExportLog(string layer, string polygon, string error)
+        {
+            if (Globals.ExportErrors.ContainsKey(layer))
+            {
+                Globals.ExportErrors[layer].Add((polygon, error));
+            }
+            else
+            {
+                Globals.ExportErrors.Add(layer, new List<(string, string)>() { (polygon, error) });
             }
         }
     }

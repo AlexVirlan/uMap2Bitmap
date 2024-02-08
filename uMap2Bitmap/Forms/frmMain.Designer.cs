@@ -127,6 +127,8 @@
             pnlAppSettings = new Panel();
             colorDialog = new ColorDialog();
             folderBrowserDialog = new FolderBrowserDialog();
+            backgroundWorker = new System.ComponentModel.BackgroundWorker();
+            lblStatus = new Label();
             pnlMain.SuspendLayout();
             pnlTags.SuspendLayout();
             pnlGlobalTags.SuspendLayout();
@@ -362,6 +364,7 @@
             // pnlExport
             // 
             pnlExport.BorderStyle = BorderStyle.FixedSingle;
+            pnlExport.Controls.Add(lblStatus);
             pnlExport.Controls.Add(btnOutput);
             pnlExport.Controls.Add(btnSettings);
             pnlExport.Controls.Add(btnRUN);
@@ -1290,6 +1293,23 @@
             folderBrowserDialog.Description = "Select an output directory";
             folderBrowserDialog.UseDescriptionForTitle = true;
             // 
+            // backgroundWorker
+            // 
+            backgroundWorker.WorkerSupportsCancellation = true;
+            backgroundWorker.DoWork += backgroundWorker_DoWork;
+            backgroundWorker.ProgressChanged += backgroundWorker_ProgressChanged;
+            backgroundWorker.RunWorkerCompleted += backgroundWorker_RunWorkerCompleted;
+            // 
+            // lblStatus
+            // 
+            lblStatus.AutoSize = true;
+            lblStatus.Location = new Point(428, 19);
+            lblStatus.Name = "lblStatus";
+            lblStatus.Size = new Size(26, 15);
+            lblStatus.TabIndex = 11;
+            lblStatus.Text = "Idle";
+            lblStatus.TextAlign = ContentAlignment.MiddleCenter;
+            // 
             // frmMain
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -1426,5 +1446,7 @@
         private Button btnOutput;
         private Label lblOutput;
         private FolderBrowserDialog folderBrowserDialog;
+        private System.ComponentModel.BackgroundWorker backgroundWorker;
+        private Label lblStatus;
     }
 }

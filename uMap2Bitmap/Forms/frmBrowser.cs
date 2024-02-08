@@ -101,6 +101,14 @@ namespace uMap2Bitmap.Forms
             if (hideWindow) { this.Hide(); }
         }
 
+        public string GetCapture(string jsonParams)
+        {
+            var task = Task.Run(async () => await webView.CoreWebView2.CallDevToolsProtocolMethodAsync("Page.captureScreenshot", jsonParams));
+            var result = task.Result;
+
+            return "";
+        }
+
         private void frmBrowser_Resize(object sender, EventArgs e)
         {
             SetWindowTitle();

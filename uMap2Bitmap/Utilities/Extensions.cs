@@ -55,6 +55,13 @@ namespace uMap2Bitmap.Utilities
         }
         #endregion
 
+        #region Int
+        public static int Map(this int i, int inMin, int inMax, int outMin, int outMax)
+        {
+            return (i - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
+        }
+        #endregion
+
         #region TreeView
         public static void CheckTreeNodeCollection(this TreeNodeCollection treeNodeCollection, bool isChecked = true)
         {

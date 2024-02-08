@@ -11,6 +11,6 @@ namespace uMap2Bitmap.Utilities
     {
         public static List<string>? Args = null;
         public static Dictionary<string, Dictionary<string, List<string>>> CustomPropsStats;
-
+        public static Dictionary<string, List<(string polygonName, string error)>> ExportErrors;
     }
 }
